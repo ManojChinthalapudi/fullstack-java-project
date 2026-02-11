@@ -1,0 +1,46 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.properties-container {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.properties-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.properties-table th,
+.properties-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.properties-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.properties-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.properties-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.property-image {
+    max-width: 100px;
+    max-height: 80px;
+    object-fit: cover;
+}

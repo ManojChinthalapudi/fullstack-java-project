@@ -1,0 +1,54 @@
+/* Assuming the header has a class like `.admin-header` */
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.add-subscriber-container {
+    position: relative;
+    z-index: 10000;
+    /* Higher z-index for the Add Subscriber container */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #121212;
+    /* Optional, ensures good contrast */
+}
+
+.add-subscriber-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    z-index:1000;
+}
+
+.input-field {
+    padding: 10px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #4066ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #3457d2;
+}
+
+.error {
+    color: red;
+    font-size: 1rem;
+    margin-top: 10px;
+}

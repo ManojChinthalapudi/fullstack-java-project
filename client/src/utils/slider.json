@@ -1,0 +1,38 @@
+[
+  {
+    "name": "300 sqft Pragatinagar Land",
+    "price": "15 Lakh",
+    "detail": "Near Vnr College",
+    "image": "./r1.png"
+  },
+  {
+    "name": "150 sqft shamshabad Land",
+    "price": "10 Lakh",
+    "detail": "25 km from Airport",
+    "image": "./r2.png"
+  },
+  {
+    "name": "200 sqft in Dilsuknagar",
+    "price": "18 Lakh",
+    "detail": "Near Xyz restaraunt",
+    "image": "./r3.png"
+  },
+  {
+    "name": "80 sqft  in Ameerpet",
+    "price": "8 Lakh",
+    "detail": "Near Yellamma temple",
+    "image": "./r1.png"
+  },
+  {
+    "name": "160 sqft in Yousufguda",
+    "price": "8 Lakh",
+    "detail": "Near ICICI Bank",
+    "image": "./r2.png"
+  },
+  {
+    "name": "280 sqft land in Gatkesar",
+    "price": "10 Lakh",
+    "detail": "City Outskirts near Srinidhi college",
+    "image": "./r3.png"
+  }
+]
