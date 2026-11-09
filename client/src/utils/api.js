@@ -2,7 +2,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
 export const api = axios.create({
-    baseURL:"http://localhost:8000/api"
+    baseURL:"http://localhost:8080/api"
 })
 export const getAllProperties = async () => {
   try {
@@ -210,7 +210,7 @@ export const createRejectResidency = async (data, token) => {
 export const removeBooking = async (id, email, token) => {
   try {
     await api.post(
-      `/user/removeBooking/${id}`,
+      `/user/cancelBooking/${id}`,
       {
         email,
       },
