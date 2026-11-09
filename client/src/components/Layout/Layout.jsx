@@ -90,7 +90,11 @@ import useFavourites from "../../hooks/useFavourites";
 const Layout = () => {
   useFavourites();
 
-  const { isAuthenticated, user, getAccessTokenWithPopup } = useAuth0();
+  const {
+  isAuthenticated,
+  user,
+  getAccessTokenSilently
+} = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
@@ -103,23 +107,40 @@ const Layout = () => {
 
   // Function to handle token retrieval and storage
   const handleTokenSetup = async () => {
-    const token = localStorage.getItem("access_token");
-    
-    if (isAuthenticated && !token) {
-      try {
-        const res = await getAccessTokenWithPopup({
-          authorizationParams: {
-            audience: "http://localhost:8000",
-            scope: "openid profile email",
-          },
-        });
-        localStorage.setItem("access_token", res);
-        setUserDetails((prev) => ({ ...prev, token: res }));
-        mutate(res);
-      } catch (error) {
-        console.error("Error fetching token:", error);
-      }
+    if (!isAuthenticated) return;
+
+  try {
+    // Always obtain a valid token, even if localStorage has an old token
+    const res = await getAccessTokenSilently({
+      authorizationParams: {
+        audience: "http://localhost:8000",
+        scope: "openid profile email",
+      },
+    });
+
+    // Store token in both localStorage and React context
+    localStorage.setItem("access_token", res);
+
+    setUserDetails((prev) => ({
+      ...prev,
+      token: res,
+    }));
+
+    // Register user
+    if (user?.email) {
+      mutate(res);
     }
+
+    console.log("Access token initialized:", !!res);
+
+  } catch (error) {
+    console.error("Token initialization failed:", error);
+    console.log("Auth0 error:", {
+    error: error.error,
+    description: error.error_description,
+    message: error.message
+  });
+  }
   };
 
   useEffect(() => {
