@@ -8,11 +8,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <Auth0Provider
      domain="dev-2mqlxmewxvch3sim.us.auth0.com"
      clientId="CTDDyzleXbMpb4LjrNBJSD1sCYq7Vrqa"
+     useRefreshTokens={true}
+     cacheLocation="localstorage"
      authorizationParams={{
-      redirect_uri: "http://localhost:5173"
+      redirect_uri: "http://localhost:5173",
+      audience: "http://localhost:8000",
+      scope: "openid profile email"
      }}
-     audience="http://localhost:8000"
-     scope="openid profile email"
     >
       <App />
     </Auth0Provider>
