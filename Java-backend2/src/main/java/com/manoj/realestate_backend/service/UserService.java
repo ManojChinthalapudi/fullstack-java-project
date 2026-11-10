@@ -31,11 +31,12 @@ public class UserService {
             );
         }
 
-        if (repository.existsByEmail(user.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "User already registered"
-            );
+        // Registration is idempotent: the frontend calls /api/user/register
+        // on every login/page load, so an already registered email must
+        // return the existing user instead of failing with 409.
+        var existingUser = repository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            return existingUser.get();
         }
 
         if (user.getBookedVisits() == null) {
