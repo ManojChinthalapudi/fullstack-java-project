@@ -41,7 +41,7 @@ const Plots = () => {
         <Swiper {...sliderSettings}>
           <SlideNextButton />
           {/* slider */}
-          {data.slice(0,8).map((card, i) => (
+          {(data || []).slice(0,8).map((card, i) => (
             <SwiperSlide key={i}>
               {/* <div className="flexColStart r-card">
                 <img src={card.image} alt="home" />

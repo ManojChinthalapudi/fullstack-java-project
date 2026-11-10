@@ -207,6 +207,11 @@ export const createRejectResidency = async (data, token) => {
   }
 };
 
+export const deleteAdminResidency = async (id, token) => {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  await api.delete(`/residency/adminResidency/${id}`, { headers });
+};
+
 export const removeBooking = async (id, email, token) => {
   try {
     await api.post(
@@ -246,7 +251,7 @@ export const toFav = async (id, email, token) => {
 };
 
 export const getAllFav = async (email, token) => {
-  if(!token) return 
+  if(!token) return [];
   try{
 
     const res = await api.post(
@@ -260,8 +265,9 @@ export const getAllFav = async (email, token) => {
         },
       }
     );
-      
-    return res.data["favResidenciesID"]
+
+    const favourites = res.data?.["favResidenciesID"];
+    return Array.isArray(favourites) ? favourites : [];
 
   }catch(e)
   {

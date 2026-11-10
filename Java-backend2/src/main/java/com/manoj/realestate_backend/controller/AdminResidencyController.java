@@ -58,4 +58,13 @@ public class AdminResidencyController {
                 )
         );
     }
+
+    @DeleteMapping("/adminResidency/{id}")
+    public ResponseEntity<Void> deleteAdminResidency(
+            @PathVariable String id) {
+
+        service.deleteAdminResidency(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -13,8 +13,14 @@ const useFavourites = () => {
     queryKey: "allFavourites",
     queryFn: () => getAllFav(user?.email, userDetails?.token),
     onSuccess: (data) =>
-      setUserDetails((prev) => ({ ...prev, favourites: data })),
-    enabled: user !== undefined,
+      setUserDetails((prev) => ({
+        ...prev,
+        favourites: Array.isArray(data) ? data : [],
+      })),
+    // Do not fetch before the access token and email are both available:
+    // the request would return no data and overwrite favourites with
+    // undefined, which broke the Favourites page.
+    enabled: Boolean(user?.email) && Boolean(userDetails?.token),
     staleTime: 30000,
   });
 

@@ -19,8 +19,13 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import Favourites from "./pages/Favourites/Favourites";
 import AcceptProperties from "./pages/AcceptProperties/AcceptProperties";
 import RejectProperties from "./pages/RejectProperties/RejectProperties";
+
+// One query client for the whole app. Creating it inside App() meant every
+// re-render (for example when the auth token is stored in context) threw
+// away the cache and refetched everything.
+const queryClient = new QueryClient()
+
 function App() {
-  const queryClient = new QueryClient()
   const [userDetails, setUserDetails] = useState({
     favourites:[],
     bookings:[],

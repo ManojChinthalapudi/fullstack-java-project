@@ -37,7 +37,7 @@ const BasicDetails = ({ prevStep, propertyDetails, setPropertyDetails, setOpened
       price,
       userEmail: user?.email
     }, token),
-    onError: ({ response }) => toast.error(response.data.message || "Error adding property.", { position: "bottom-right" }),
+    onError: (error) => toast.error(error?.response?.data?.message || "Error adding property.", { position: "bottom-right" }),
   });
 
   const { mutate: mutateAdminResidency, isLoading: isLoadingAdminResidency } = useMutation({
@@ -48,8 +48,8 @@ const BasicDetails = ({ prevStep, propertyDetails, setPropertyDetails, setOpened
       price,
       userEmail: user?.email
     }, token),
-    onError: ({ response }) => toast.error(response.data.message || "Error adding admin property.", { position: "bottom-right" }),
-    onSettled: () => {
+    onError: (error) => toast.error(error?.response?.data?.message || "Error adding admin property.", { position: "bottom-right" }),
+    onSuccess: () => {
       toast.success("Property gets added after Admin Approval", { position: "bottom-right" });
       resetPropertyDetails();
     },

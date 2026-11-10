@@ -57,6 +57,7 @@
 
 // export default Addsubscriber;
 import React, { useState } from 'react';
+import { api } from '../../utils/api';
 //import './Addsubscriber.css';
 
 const Addsubscriber = () => {
@@ -70,25 +71,20 @@ const Addsubscriber = () => {
     setError(''); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:8000/api/user/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      // Use the shared API client so this always targets the same backend
+      // as the rest of the app (previously hard-coded to port 8000).
+      const { data } = await api.post('/user/register', { email });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data?.message) {
         alert(data.message);
-        setEmail(''); // Clear input on successful creation
-      } else {
-        setError(data.message || "Failed to create subscriber"); // Set error if not ok
       }
+      setEmail(''); // Clear input on successful creation
     } catch (error) {
       console.error("Error creating user:", error);
-      setError("An error occurred while creating the user."); // Display network error
+      setError(
+        error?.response?.data?.message ||
+        "An error occurred while creating the user."
+      ); // Display server/network error
     } finally {
       setIsLoading(false); // End loading state
     }

@@ -51,12 +51,12 @@ const UploadImage = ({
   const cloudinaryRef = useRef();
   const widgetRef = useRef();
   const handleNext = () => {
-    // If no image is uploaded, set a default image
-    if (!imageURL) {
-      setImageURL("/logo1.png"); // Default image URL
-    }
-    // Update propertyDetails with the imageURL (default or uploaded)
-    setPropertyDetails((prev) => ({ ...prev, image: imageURL }));
+    // Compute the fallback synchronously: setImageURL does not update the
+    // imageURL variable, so the previous code saved null instead of the
+    // default image.
+    const image = imageURL || "/logo1.png";
+    setImageURL(image);
+    setPropertyDetails((prev) => ({ ...prev, image }));
     nextStep();
   };
   useEffect(() => {

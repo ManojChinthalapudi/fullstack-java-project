@@ -168,15 +168,15 @@ public class UserService {
 
     public Map<String, Object> getAllFavourites(String email) {
 
-        User user = repository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "User not found"
-                ));
+        // A brand new user may not have been persisted yet when the
+        // frontend first loads favourites. Treat that as "no favourites"
+        // instead of failing the whole page with a 404.
+        User user = repository.findByEmail(email).orElse(null);
 
-        List<String> favourites = user.getFavResidenciesID() == null
-                ? new ArrayList<>()
-                : user.getFavResidenciesID();
+        List<String> favourites =
+                (user == null || user.getFavResidenciesID() == null)
+                        ? new ArrayList<>()
+                        : user.getFavResidenciesID();
 
         return Map.of("favResidenciesID", favourites);
     }

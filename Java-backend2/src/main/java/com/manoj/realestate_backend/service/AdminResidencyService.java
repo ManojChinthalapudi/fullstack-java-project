@@ -59,4 +59,9 @@ public class AdminResidencyService {
 
         return repository.save(residency);
     }
+
+    public void deleteAdminResidency(String id) {
+        AdminResidency existing = getAdminResidencyById(id);
+        repository.delete(existing);
+    }
 }

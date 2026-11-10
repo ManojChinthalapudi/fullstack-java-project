@@ -4,7 +4,7 @@ import { getAllAdminProperties } from '../utils/api'
 
 const useAdminProperties = () => {
   const { data, isError, isLoading, refetch } = useQuery(
-    "allProperties", getAllAdminProperties, { refetchOnWindowFocus: false }
+    "allAdminProperties", getAllAdminProperties, { refetchOnWindowFocus: false }
   );
   
   // Return an object with the values

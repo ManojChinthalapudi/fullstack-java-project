@@ -207,70 +207,62 @@
 
 
 //------------------------------------------------------------
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HiLocationMarker } from 'react-icons/hi';
 
 const SearchBar = ({ filter, setFilter }) => {
   const [suggestions, setSuggestions] = useState([]);
-  const [query, setQuery] = useState('');
+  const timeoutRef = useRef(null);
 
-  const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
+  // Debounce based on the filter value itself and clean the timer up.
+  // Creating a new debounce function on every render (the old code) meant
+  // every keystroke still fired a request.
+  useEffect(() => {
+    const query = filter.trim();
 
-  const fetchSuggestions = async (query) => {
     if (!query) {
       setSuggestions([]);
       return;
     }
 
-    try {
-      const response = await fetch(`https://api.locationiq.com/v1/autocomplete.php?key=pk.5a427daa355fc91e61bd412c29e409f3&q=${query}&countrycodes=IN&limit=5`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+    const fetchSuggestions = async () => {
+      try {
+        const response = await fetch(
+          `https://api.locationiq.com/v1/autocomplete.php?key=pk.5a427daa355fc91e61bd412c29e409f3&q=${encodeURIComponent(query)}&countrycodes=IN&limit=5`
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const filteredSuggestions = data
+            .map(suggestion => {
+              const parts = suggestion.display_name.split(', ');
+              const cityName = parts[0].trim();
+              return { display_name: cityName };
+            })
+            .filter(suggestion =>
+              suggestion.display_name.toLowerCase().includes(query.toLowerCase())
+            );
+
+          setSuggestions(filteredSuggestions);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (error) {
+        console.error("Error fetching suggestions:", error.message);
+        setSuggestions([]); // Clear suggestions on error
       }
+    };
 
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        const filteredSuggestions = data
-          .map(suggestion => {
-            const parts = suggestion.display_name.split(', ');
-            const cityName = parts[0].trim();
-            return { display_name: cityName };
-          })
-          .filter(suggestion => 
-            suggestion.display_name.toLowerCase().includes(query.toLowerCase())
-          );
+    timeoutRef.current = setTimeout(fetchSuggestions, 300);
 
-        setSuggestions(filteredSuggestions);
-      } else {
-        setSuggestions([]);
-      }
-    } catch (error) {
-      console.error("Error fetching suggestions:", error.message);
-      setSuggestions([]); // Clear suggestions on error
-    }
-  };
-
-  const debouncedFetchSuggestions = debounce(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutRef.current);
+  }, [filter]);
 
   const handleChange = (e) => {
-    const value = e.target.value;
-    setFilter(value);
-    setQuery(value);
-    if (value) {
-      debouncedFetchSuggestions(value);
-    } else {
-      setSuggestions([]);
-    }
+    setFilter(e.target.value);
   };
 
   const handleSuggestionClick = (suggestion) => {

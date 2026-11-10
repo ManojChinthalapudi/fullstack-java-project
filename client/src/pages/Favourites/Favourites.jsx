@@ -12,6 +12,7 @@ const Favourites = () => {
   const {
     userDetails: { favourites },
   } = useContext(UserDetailContext);
+  const favouriteIds = Array.isArray(favourites) ? favourites : [];
 
   if (isError) {
     return (
@@ -43,14 +44,14 @@ const Favourites = () => {
           {
             // data.map((card, i)=> (<PropertyCard card={card} key={i}/>))
 
-            data
-              .filter((property) => favourites.includes(property.id))
+            (data || [])
+              .filter((property) => favouriteIds.includes(property.id))
 
               .filter(
                 (property) =>
-                  property.title.toLowerCase().includes(filter.toLowerCase()) ||
-                  property.city.toLowerCase().includes(filter.toLowerCase()) ||
-                  property.country.toLowerCase().includes(filter.toLowerCase())
+                  (property.title || "").toLowerCase().includes(filter.toLowerCase()) ||
+                  (property.city || "").toLowerCase().includes(filter.toLowerCase()) ||
+                  (property.country || "").toLowerCase().includes(filter.toLowerCase())
               )
               .map((card, i) => (
                 <PropertyCard card={card} key={i} />

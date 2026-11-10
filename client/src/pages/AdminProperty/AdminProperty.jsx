@@ -308,15 +308,21 @@
 // export default AdminProperty;
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "react-query";
-import { useLocation } from "react-router-dom";
-import { getAdminProperty, createResidency, getAllProperties,getAllRejectProperties,createAcceptResidency,createRejectResidency } from "../../utils/api";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getAdminProperty, createResidency, getAllProperties,getAllRejectProperties,createAcceptResidency,createRejectResidency,deleteAdminResidency } from "../../utils/api";
 import { PuffLoader } from "react-spinners";
 import { AiFillHeart } from "react-icons/ai";
 import { toast } from "react-toastify";
 import "./AdminProperty.css";
 
+const isSameProperty = (residency, adminResidency) =>
+  Boolean(residency && adminResidency) &&
+  residency.address === adminResidency.address &&
+  residency.userEmail === adminResidency.userEmail;
+
 const AdminProperty = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const id = pathname.split("/").slice(-1)[0];
   const [isAccepted, setIsAccepted] = useState(false);
   const [isRejected, setIsRejected] = useState(false); // Track rejection status
@@ -327,44 +333,35 @@ const AdminProperty = () => {
   // Fetch all accepted residencies to check if current property is already accepted
   const { data: acceptedResidencies, isLoading: isResidenciesLoading } = useQuery(
     "acceptedResidencies",
-    getAllProperties,
-    {
-      onSuccess: (data) => {
-        if (propertyData) {
-          const propertyExists = data.some((residency) => (
-            residency.title === propertyData.AdminResidency.title &&
-            residency.price === propertyData.AdminResidency.price &&
-            residency.description === propertyData.AdminResidency.description &&
-            residency.address === propertyData.AdminResidency.address &&
-            residency.city === propertyData.AdminResidency.city &&
-            residency.country === propertyData.AdminResidency.country
-          ));
-          setIsAccepted(propertyExists);
-        }
-      }
-    }
+    getAllProperties
   );
 
   // Fetch all Rejected residencies to check if current property is already rejected
   const { data: rejectedResidencies, isLoading: isRejectedResidenciesLoading } = useQuery(
     "rejectedResidencies",
-    getAllRejectProperties,
-    {
-      onSuccess: (data) => {
-        if (propertyData) {
-          const propertyExists = data.some((residency) => (
-            residency.title === propertyData.AdminResidency.title &&
-            residency.price === propertyData.AdminResidency.price &&
-            residency.description === propertyData.AdminResidency.description &&
-            residency.address === propertyData.AdminResidency.address &&
-            residency.city === propertyData.AdminResidency.city &&
-            residency.country === propertyData.AdminResidency.country
-          ));
-          setIsRejected(propertyExists);
-        }
-      }
-    }
+    getAllRejectProperties
   );
+
+  // Derive the status from the fetched data instead of relying on the
+  // query onSuccess callback, which could run before the property itself
+  // was loaded and then never re-check.
+  useEffect(() => {
+    if (!propertyData?.AdminResidency || !Array.isArray(acceptedResidencies)) return;
+    setIsAccepted(
+      acceptedResidencies.some((residency) =>
+        isSameProperty(residency, propertyData.AdminResidency)
+      )
+    );
+  }, [propertyData, acceptedResidencies]);
+
+  useEffect(() => {
+    if (!propertyData?.AdminResidency || !Array.isArray(rejectedResidencies)) return;
+    setIsRejected(
+      rejectedResidencies.some((residency) =>
+        isSameProperty(residency, propertyData.AdminResidency)
+      )
+    );
+  }, [propertyData, rejectedResidencies]);
 
  // Mutations for creating residency and adding to accept/reject table
  const { mutateAsync: acceptResidency, isLoading: isAcceptingResidency } = useMutation(createResidency);
@@ -373,27 +370,54 @@ const AdminProperty = () => {
 
 
  const handleAccept = async () => {
-   if (propertyData) {
+   const residency = propertyData?.AdminResidency;
+   if (!residency) return;
+   try {
+     // 409 means it is already in the target table, which is fine.
      try {
-       await acceptResidency(propertyData.AdminResidency); // Add to Residency table
-       await acceptTableEntry(propertyData.AdminResidency); // Add to Accept table
-       setIsAccepted(true);
-       toast.success("Property accepted and added to Website and Accept Table.");
+       await acceptResidency(residency); // Add to Residency table
      } catch (error) {
-       toast.error("Failed to add property to Website and Accept Table.");
+       if (error?.response?.status !== 409) throw error;
      }
+     try {
+       await acceptTableEntry(residency); // Add to Accept table
+     } catch (error) {
+       if (error?.response?.status !== 409) throw error;
+     }
+     setIsAccepted(true);
+     toast.success("Property accepted and added to Website and Accept Table.");
+     // Remove it from the admin pending queue.
+     try {
+       await deleteAdminResidency(residency.id);
+     } catch {
+       toast.warn("Accepted, but it could not be removed from the pending list.");
+     }
+     navigate("/approveproperties");
+   } catch (error) {
+     toast.error("Failed to add property to Website and Accept Table.");
    }
  };
 
  const handleReject = async () => {
-  if (propertyData) {
+  const residency = propertyData?.AdminResidency;
+  if (!residency) return;
+  try {
     try {
-      await rejectResidency(propertyData.AdminResidency); // Add to Reject table
-      setIsRejected(true); // Set the rejection status to true
-      toast.info("Property rejected and added to Reject Table.");
+      await rejectResidency(residency); // Add to Reject table
     } catch (error) {
-      toast.error("Failed to reject property and add to Reject Table.");
+      if (error?.response?.status !== 409) throw error;
     }
+    setIsRejected(true); // Set the rejection status to true
+    toast.info("Property rejected and added to Reject Table.");
+    // Remove it from the admin pending queue.
+    try {
+      await deleteAdminResidency(residency.id);
+    } catch {
+      toast.warn("Rejected, but it could not be removed from the pending list.");
+    }
+    navigate("/approveproperties");
+  } catch (error) {
+    toast.error("Failed to reject property and add to Reject Table.");
   }
 };
 

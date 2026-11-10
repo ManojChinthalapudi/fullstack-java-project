@@ -59,6 +59,13 @@ public class SecurityConfig {
                                 "/api/residency/rejectCreate"
                         ).permitAll()
 
+                        // Used after approving/rejecting so a pending
+                        // request disappears from the admin queue.
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/residency/adminResidency/*"
+                        ).permitAll()
+
                         // Temporarily public user APIs for frontend integration
                         .requestMatchers(
                                 "/api/user/register",

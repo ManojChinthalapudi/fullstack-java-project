@@ -145,7 +145,9 @@ const Layout = () => {
 
   useEffect(() => {
     handleTokenSetup(); // Initialize token handling when authenticated
-  }, [isAuthenticated]);
+    // Re-run when the user profile arrives, otherwise a slow Auth0
+    // profile load meant the user was never registered.
+  }, [isAuthenticated, user?.email]);
 
   useEffect(() => {
     // Check if the current user is an admin

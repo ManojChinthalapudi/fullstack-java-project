@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ResidencyService {
@@ -56,6 +57,11 @@ public class ResidencyService {
             );
         }
 
+        if (residency.getImage() == null ||
+                residency.getImage().isBlank()) {
+            residency.setImage("/logo1.png");
+        }
+
         Instant now = Instant.now();
 
         residency.setCreatedAt(now);
@@ -70,7 +76,9 @@ public class ResidencyService {
         Residency existing = getResidencyById(id);
 
         // Check for duplicate address if the address has changed
-        if (!existing.getAddress().equals(updatedResidency.getAddress())) {
+        if (!Objects.equals(
+                existing.getAddress(),
+                updatedResidency.getAddress())) {
 
             boolean alreadyExists = residencyRepository
                     .findByAddressAndUserEmail(
